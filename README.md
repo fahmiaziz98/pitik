@@ -283,6 +283,24 @@ cp backups/pitik_20260628.db data/pitik.db
 The `./data` folder is mounted as a Docker volume, so data persists across
 container restarts and rebuilds.
 
+---
+
+## Screenshoot
+
+<table border="0">
+  <tr>
+    <td>
+      <img src="assets/image-1.jpg" width="300" alt="Images"><br>
+      <p align="center">Image-1</p>
+    </td>
+    <td>
+      <img src="assets/image-2.jpg" width="300" alt="Image receipt"><br>
+      <p align="center">Image receipt</p>
+    </td>
+  </tr>
+</table>
+
+
 
 ---
 
