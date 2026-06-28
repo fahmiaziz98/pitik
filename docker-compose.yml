@@ -1,0 +1,9 @@
+services:
+  pitik:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./data:/app/data
