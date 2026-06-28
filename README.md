@@ -229,6 +229,9 @@ pitik/
 │   ├── models.py 
 │   └── client.py         # Async SQLite operations
 ├── schema.sql            # Database schema
+├── Dockerfile
+├── docker-compose.yml
+├── pyproject.toml
 └── main.py               # Entry point
 ```
 
