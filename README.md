@@ -42,8 +42,6 @@ The gap is clear: Indonesians are deeply comfortable with chat interfaces, but t
 | **Conversation memory** | Pitik remembers context across turns — corrections work naturally |
 | **Multi-modal LLM** | OpenAI Compatible (Groq, Openrouter, Openai etc) |
 | **Self-hostable** | One `docker compose up` and you're running |
-| **Open source** | MIT licensed, contributions welcome |
-
 ---
 
 ## Quick Start
@@ -52,7 +50,7 @@ The gap is clear: Indonesians are deeply comfortable with chat interfaces, but t
 
 - Python 3.12+
 - A Telegram bot token (from [@BotFather](https://t.me/BotFather))
-- An LLM API key, Base Url and Model name
+- An LLM API key, base Url and model name
 
 ### 1. Clone & configure
 
@@ -217,30 +215,19 @@ sequenceDiagram
 
 ```
 pitik/
-
-├── assets
-│   ├── image-1.jpg
-│   └── image-2.jpg
-├── data
-│   ├── pitik.db
-│   └── pitik_session.db
 ├── src
 │   ├── agent
 │   │   ├── agent.py
-│   │   ├── __init__.py
 │   │   ├── schema_tool_input.py
 │   │   └── tools.py
 │   ├── bot
-│   │   ├── __init__.py
 │   │   └── telegram_handler.py
 │   ├── core
 │   │   ├── config.py
-│   │   ├── __init__.py
 │   │   ├── logging.py
 │   │   └── utils.py
 │   ├── db
 │   │   ├── client.py
-│   │   ├── __init__.py
 │   │   └── models.py
 │   ├── main.py
 │   └── schema.sql
