@@ -97,7 +97,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 
 # then
-uv run main.py
+uv run src/main.py
 ```
 
 That's it. Open Telegram, send `/start` to your bot, and start chatting.
@@ -217,22 +217,39 @@ sequenceDiagram
 
 ```
 pitik/
-├── agent/
-│   ├── agent.py          # Agno agent — LLM orchestration
-│   └── tools.py          # DB tools: save, query, budget
-├── bot/
-│   └── telegram_handler.py  # Telegram routing
-├── core/
-│   ├── config.py         # Pydantic settings
-│   └── utils.py          # date helpers
-├── db/
-│   ├── models.py 
-│   └── client.py         # Async SQLite operations
-├── schema.sql            # Database schema
-├── Dockerfile
+
+├── assets
+│   ├── image-1.jpg
+│   └── image-2.jpg
+├── data
+│   ├── pitik.db
+│   └── pitik_session.db
+├── src
+│   ├── agent
+│   │   ├── agent.py
+│   │   ├── __init__.py
+│   │   ├── schema_tool_input.py
+│   │   └── tools.py
+│   ├── bot
+│   │   ├── __init__.py
+│   │   └── telegram_handler.py
+│   ├── core
+│   │   ├── config.py
+│   │   ├── __init__.py
+│   │   ├── logging.py
+│   │   └── utils.py
+│   ├── db
+│   │   ├── client.py
+│   │   ├── __init__.py
+│   │   └── models.py
+│   ├── main.py
+│   └── schema.sql
 ├── docker-compose.yml
+├── Dockerfile
+├── LICENSE
 ├── pyproject.toml
-└── main.py               # Entry point
+├── README.md
+└── uv.lock
 ```
 
 ### Tech Stack
@@ -336,11 +353,3 @@ Please keep PRs focused and small. One feature or fix per PR.
 MIT — free to use, modify, and distribute.
 
 ---
-
-<div align="center">
-
-Built with ☕ by [@fahmiaziz98](https://github.com/fahmiaziz98)
-
-*If Pitik helped you track your spending, give it a ⭐*
-
-</div>

@@ -15,4 +15,4 @@ RUN uv sync --frozen --no-dev
 COPY . .
 
 # Jalankan pakai uv
-CMD ["uv", "run", "main.py"]
+CMD ["uv", "run", "src/main.py"]

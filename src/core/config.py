@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     AGENT_SESSION_DB_PATH: str
 
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
+    LOG_FORMAT: Literal["console", "json"] = "console"
     MAX_FILE_SIZE_MB: int = 10
 
     @computed_field

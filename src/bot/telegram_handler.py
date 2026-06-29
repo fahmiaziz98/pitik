@@ -1,22 +1,23 @@
 from __future__ import annotations
 
-import logging
 from io import BytesIO
 
+import structlog
 from telegram import Update
 from telegram.ext import (
-    Application,
+    ApplicationBuilder,
     CommandHandler,
     ContextTypes,
     MessageHandler,
     filters,
 )
+from telegram.request import HTTPXRequest
 
 from agent.agent import run as agent_run
 from core.config import settings
 from db.client import DatabaseError, get_or_create_user
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 _pending_confirmations: dict[int, str] = {}
 
@@ -53,7 +54,7 @@ async def _resolve_user(update: Update) -> dict | None:
     try:
         return await get_or_create_user(tg_user.id, name)
     except DatabaseError as exc:
-        logger.error("User resolution failed: %s", exc)
+        logger.error("user_resolution_failed", error=str(exc))
         return None
 
 
@@ -192,7 +193,7 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         await _reply(update, reply)
 
     except Exception as exc:
-        logger.exception("handle_photo error: %s", exc)
+        logger.error("handle_photo error", error=str(exc), exc_info=True)
         await _reply(update, "Gagal memproses foto. Pastikan foto terlihat jelas ya!")
 
 
@@ -245,7 +246,7 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         await _reply(update, reply)
 
     except Exception as exc:
-        logger.exception("handle_document error: %s", exc)
+        logger.error("handle_document error", error=str(exc), exc_info=True)
         await _reply(update, "Gagal memproses file. Coba lagi ya!")
 
 
@@ -256,7 +257,16 @@ def build_app() -> Application:
     Returns:
         Configured Application instance, ready to run.
     """
-    app = Application.builder().token(settings.telegram_api_key).build()
+    request = HTTPXRequest(
+        connection_pool_size=8,
+        connect_timeout=15.0,
+        read_timeout=15.0,
+        write_timeout=15.0,
+        pool_timeout=5.0,
+    )
+    app = ApplicationBuilder().token(settings.telegram_api_key).request(request).build()
+
+    app.add_error_handler(error_handler)
 
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("help", cmd_help))
@@ -266,3 +276,28 @@ def build_app() -> Application:
     app.add_handler(MessageHandler(filters.Document.ALL, handle_document))
 
     return app
+
+
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Global error handler — log semua error tanpa crash bot.
+    NetworkError diabaikan karena self-healing (Telegram auto-retry).
+    """
+    from telegram.error import NetworkError, RetryAfter, TimedOut
+
+    err = context.error
+
+    if isinstance(err, (NetworkError, TimedOut)):
+        logger.warning("telegram_network_error", error=str(err))
+        return
+
+    if isinstance(err, RetryAfter):
+        logger.warning("telegram_rate_limited", retry_after=err.retry_after)
+        return
+
+    logger.error(
+        "unhandled_error",
+        error=str(err),
+        update=str(update)[:200] if update else None,
+        exc_info=err,
+    )

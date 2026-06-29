@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-import logging
 import uuid
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
 import aiosqlite
+import structlog
 
 from core.config import settings
 from db.models import BudgetData, TransactionData
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 _SCHEMA_PATH = Path(__file__).parent.parent / "schema.sql"
 
@@ -34,9 +34,9 @@ async def init_db() -> None:
         async with aiosqlite.connect(settings.DATABASE_PATH) as db:
             await db.executescript(schema_sql)
             await db.commit()
-        logger.info("Database schema ready at %s", settings.DATABASE_PATH)
+        logger.info("database_schema_ready", path=settings.DATABASE_PATH)
     except Exception as exc:
-        logger.error("init_db failed: %s", exc)
+        logger.error("init_db failed", error=str(exc), exc_info=True)
         raise DatabaseError("Fail initialize database.") from exc
 
 
@@ -70,7 +70,7 @@ async def get_or_create_user(telegram_id: int, name: str) -> dict[str, Any]:
                 (new_id, telegram_id, name, datetime.utcnow().isoformat()),
             )
             await db.commit()
-            logger.info(f"save user: {new_id}")
+            logger.info("user_created", id=new_id, telegram_id=telegram_id, name=name)
             return {
                 "id": new_id,
                 "telegram_id": telegram_id,
@@ -79,7 +79,7 @@ async def get_or_create_user(telegram_id: int, name: str) -> dict[str, Any]:
             }
 
     except Exception as exc:
-        logger.error("get_or_create_user failed: %s", exc)
+        logger.error("get_or_create_user failed", error=str(exc))
         raise DatabaseError("Gagal menyimpan data user.") from exc
 
 
@@ -136,7 +136,7 @@ async def save_transactions(
         return saved
 
     except Exception as exc:
-        logger.error("save_transactions failed: %s", exc)
+        logger.error("save_transactions failed", error=str(exc))
         raise DatabaseError("Fail save transaction.") from exc
 
 
@@ -181,7 +181,7 @@ async def upsert_budgets(
         return saved
 
     except Exception as exc:
-        logger.error("upsert_budgets failed: %s", exc)
+        logger.error("upsert_budgets failed", error=str(exc))
         raise DatabaseError("Fail save budget.") from exc
 
 
@@ -227,7 +227,7 @@ async def get_summary(
             return [dict(r) for r in rows]
 
     except Exception as exc:
-        logger.error("get_summary failed: %s", exc)
+        logger.error("get_summary failed", error=str(exc))
         raise DatabaseError("Fail fetch transaction summary.") from exc
 
 
@@ -261,7 +261,7 @@ async def get_budgets(
             return [dict(r) for r in rows]
 
     except Exception as exc:
-        logger.error("get_budgets failed: %s", exc)
+        logger.error("get_budgets failed", error=str(exc))
         raise DatabaseError("Fail get budget data.") from exc
 
 
@@ -310,7 +310,7 @@ async def get_transaction_history(
             return [dict(r) for r in rows]
 
     except Exception as exc:
-        logger.error("get_transaction_history failed: %s", exc)
+        logger.error("get_transaction_history failed", error=str(exc))
         raise DatabaseError("Fail fetch transaction history.") from exc
 
 
@@ -348,7 +348,7 @@ async def upsert_total_budget(
             await db.commit()
         return {"user_id": user_id, "amount": amount, "month": month, "year": year}
     except Exception as exc:
-        logger.error("upsert_total_budget failed: %s", exc)
+        logger.error("upsert_total_budget failed", error=str(exc))
         raise DatabaseError("Gagal menyimpan total budget.") from exc
 
 
@@ -373,5 +373,5 @@ async def get_total_budget(
             row = await cursor.fetchone()
             return dict(row) if row else None
     except Exception as exc:
-        logger.error("get_total_budget failed: %s", exc)
+        logger.error("get_total_budget failed", error=str(exc))
         raise DatabaseError("Gagal mengambil total budget.") from exc

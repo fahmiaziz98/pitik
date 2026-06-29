@@ -5,15 +5,6 @@ from datetime import date
 from pydantic import BaseModel, field_validator
 
 
-class TransactionInput(BaseModel):
-    """A single financial transaction."""
-
-    amount: int
-    category: str
-    description: str
-    date: str  # YYYY-MM-DD
-
-
 class TransactionData(BaseModel):
     """Single financial transaction extracted by AI."""
 
